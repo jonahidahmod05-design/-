@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BDT333.COM কাস্টমার সার্ভিস</title>
+  
+  <!-- PWA Manifest & Chrome Install Setup -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- FontAwesome Icons for Messenger Buttons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    /* Messenger Header */
+    .chat-header {
+      padding: 12px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .user-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #050505;
+    }
+    .status {
+      font-size: 12px;
+      color: #65676b;
+    }
+    
+    /* Messages Box */
+    .messages-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #ffffff;
+    }
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      position: relative;
+    }
+    
+    /* User Message (Right Alignment) */
+    .message.user {
+      align-self: flex-end;
+      background: #0084ff;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    
+    /* Admin Reply (Left Alignment) */
+    .message.admin {
+      align-self: flex-start;
+      background: #e4e6eb;
+      color: #050505;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    /* Messenger Input Area */
+    .chat-input-area {
+      padding: 10px 12px;
+      background: #ffffff;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: #0084ff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .chat-input {
+      width: 100%;
+      padding: 10px 16px;
+      background: #f0f2f5;
+      border: none;
+      border-radius: 20px;
+      outline: none;
+      font-size: 15px;
+    }
+    #image-input {
+      display: none;
+    }
+    .send-btn {
+      background: none;
+      border: none;
+      color: #0084ff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="avatar">
+          <img src="https://i.postimg.cc/jdvdM8F1/file-0000000077f48211ae5c38cf077f8157.png" alt="Logo">
+        </div>
+        <div>
+          <div class="user-name">BDT333.COM কাস্টমার সার্ভিস</div>
+          <div class="status">অনলাইন আছেন</div>
+        </div>
+      </div>
+      <div>
+        <i class="fa-solid fa-phone icon-btn"></i>
+        <i class="fa-solid fa-video icon-btn"></i>
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="messages-box" id="messages-box">
+      <!-- মেসেজগুলো এখানে ফায়ারস্টোর থেকে লাইভ লোড হবে -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <label for="image-input" class="icon-btn">
+        <i class="fa-solid fa-image"></i>
+      </label>
+      <input type="file" id="image-input" accept="image/*">
+
+      <div class="input-wrapper">
+        <input type="text" id="message-input" class="chat-input" placeholder="আপনার সমস্যা এখানে লিখুন...">
+      </div>
+
+      <button class="send-btn" id="send-btn">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Firebase JavaScript SDK (Compatibility Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oyxmcovJ2HeCIrH-5ycLyeNV-Eb4AJU",
+      authDomain: "facebook-boost-and-post.firebaseapp.com",
+      projectId: "facebook-boost-and-post",
+      storageBucket: "facebook-boost-and-post.firebasestorage.app",
+      messagingSenderId: "575755901748",
+      appId: "1:575755901748:web:847b8d735579a60d6c6361",
+      measurementId: "G-Q040B1EW8M"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    const messagesBox = document.getElementById('messages-box');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const imageInput = document.getElementById('image-input');
+
+    // ----------------------------------------------------
+    // রوبাস্ট ডাটা রিসিভিং লজিক (Robust Data Receiving Logic)
+    // ----------------------------------------------------
+    function getActiveUserPhone() {
+      // ১. প্রথমে দেখার চেষ্টা করব URL এ ফোন নম্বর পাস হয়েছে কি না (যেমন: support.html?phone=017...)
+      const urlParams = new URLSearchParams(window.location.search);
+      let phone = urlParams.get('phone');
+
+      if (phone && phone.trim() !== "") {
+        // যদি URL এ পাওয়া যায়, তবে ব্রাউজারের লোকাল স্টোরেজে স্থায়ীভাবে সেভ করে রাখব
+        localStorage.setItem('bdt_user_phone', phone.trim());
+        return phone.trim();
+      }
+
+      // ২. যদি URL এ না থাকে, তবে দেখব ব্রাউজারের লোকাল স্টোরেজে আগে থেকে সেভ করা আছে কি না
+      let savedPhone = localStorage.getItem('bdt_user_phone');
+      if (savedPhone && savedPhone.trim() !== "") {
+        return savedPhone.trim();
+      }
+
+      // ৩. যদি কোনোভাবেই ডাটা বা নম্বর না পাওয়া যায়, তবে ইউজারের কাছ থেকে প্রম্পট নিয়ে নিশ্চিত করব
+      let manualPhone = prompt("দয়া করে আপনার রেজিস্টার্ড ফোন নম্বরটি এখানে লিখুন:");
+      if (manualPhone && manualPhone.trim() !== "") {
+        localStorage.setItem('bdt_user_phone', manualPhone.trim());
+        return manualPhone.trim();
+      }
+
+      return null;
+    }
+
+    const currentUserPhone = getActiveUserPhone();
+
+    if (!currentUserPhone) {
+      alert("সঠিক ইউজার আইডি বা ফোন নম্বর ছাড়া চ্যাটে প্রবেশ করা সম্ভব নয়!");
+    } else {
+      console.log("সক্রিয় ইউজার ফোন নম্বর:", currentUserPhone);
+      
+      // নির্দিষ্ট ইউজারের চ্যাট মেসেজগুলো রিয়েল-টাইমে লোড করা
+      db.collection('users_chats').doc(currentUserPhone).collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot((snapshot) => {
+          messagesBox.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            appendMessage(data.text, data.sender, data.imageUrl);
+          });
+        });
+    }
+
+    function appendMessage(text, sender, imageUrl) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender === 'user' ? 'user' : 'admin');
+
+      if (text) {
+        msgDiv.innerText = text;
+      }
+
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        msgDiv.appendChild(img);
+      }
+
+      messagesBox.appendChild(msgDiv);
+      messagesBox.scrollTop = messagesBox.scrollHeight;
+    }
+
+    // মেসেজ পাঠানোর সময় সঠিক ইউজারের আইডি চিনে অ্যাডমিন প্যানেলে পাঠানো
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (text !== "" && currentUserPhone) {
+        const msgData = {
+          sender: 'user',
+          text: text,
+          timestamp: Date.now()
+        };
+
+        // ইউজারের নিজস্ব ফোল্ডারে মেসেজ সেভ
+        db.collection('users_chats').doc(currentUserPhone).collection('messages').add(msgData)
+        .then(() => {
+          // অ্যাডমিন ইনবক্সে দেখানোর জন্য মূল ডকুমেন্টে আপডেট করা
+          return db.collection('users_chats').doc(currentUserPhone).set({
+            phone: currentUserPhone,
+            lastMessage: text,
+            timestamp: Date.now()
+          }, { merge: true });
+        })
+        .then(() => {
+          messageInput.value = '';
+        })
+        .catch((error) => {
+          console.error("Error sending message: ", error);
+        });
+      } else {
+        alert("ইউজার নম্বর পাওয়া যায়নি, তাই মেসেজ পাঠানো সম্ভব হচ্ছে না!");
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // ছবি বা স্ক্রিনশট আপলোড করে পাঠানো
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && currentUserPhone) {
+        const storageRef = storage.ref('chat_images/' + Date.now() + '_' + file.name);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', 
+          null, 
+          (error) => { console.error("Upload Error: ", error); }, 
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              const imgMsgData = {
+                sender: 'user',
+                imageUrl: downloadURL,
+                timestamp: Date.now()
+              };
+
+              db.collection('users_chats').doc(currentUserPhone).collection('messages').add(imgMsgData);
+              db.collection('users_chats').doc(currentUserPhone).set({
+                phone: currentUserPhone,
+                lastMessage: '[ছবি]',
+                timestamp: Date.now()
+              }, { merge: true });
+            });
+          }
+        );
+      }
+    });
+  </script>
+</body>
+</html>
